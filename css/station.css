@@ -1,6 +1,6 @@
 /* Chancenbucht: Stile für die Stationen (Kopf, Fläche, Aufgabe, Ziehen, Dialoge).
    Gleiche Regeln wie chancenbucht.css: nur opacity und transform animieren, Touchziele 48 px,
-   Unterschiede nie nur über Farbe (Skala hat Randbalken, gestrichelt für unmöglich). */
+   Unterschiede nie nur über Farbe (Skala hat Füllstand-Zeichen, gestrichelt für unmöglich). */
 
 /* ---------- Kopf der Station ---------- */
 .kopf--station { max-width: 68rem; margin-bottom: var(--a-m); }

@@ -33,11 +33,9 @@
   --papier: #f5f3ec;
   --papier-linie: #d9d3c2;
   --tinte-leise: #4a6275;
-  --lagune-ersatz: #cfe7ee;
   --glas-kante: rgba(255, 255, 255, 0.5);
   --glas-schatten: rgba(0, 0, 0, 0.36);
   --nebel: rgba(10, 52, 84, 0.7);
-  --fehler: #9b2c1f;
 
   /* Inhaltsfarben für Kugeln und Felder: gedämpft, gut unterscheidbar, jede mit eigenem Muster
      (blau Streifen, rot Punkte, gelb glatt, grün Karo). Nie nur über die Farbe unterscheiden. */
