@@ -121,12 +121,12 @@
         <div class="skala" role="group" aria-label="Wahrscheinlichkeitsskala">
           ${a.antworten.map(w => `<button type="button" class="knopf skala-knopf skala-knopf--${w}${s.skalaRichtig && w === a.loesung ? ' ist-richtig' : ''}" data-fk="skala" data-wert="${w}"${s.phase !== 'start' ? ' disabled' : ''}>${esc(E().wort(w))}</button>`).join('')}
         </div>
-        ${s.phase === 'begr' || s.begrGezeigt ? `
+        ${s.phase === 'begr' && !s.begrVersuche ? rueck : ''}${s.phase === 'begr' || s.begrGezeigt ? `
           <h2 class="frage-klein">Warum? Tippe den passenden Satz an.</h2>
           <div class="begruendungen" role="group" aria-label="Begründungen">
             ${a.begruendungen.map((b, i) => `<button type="button" class="knopf begr-knopf${s.begrRichtig && b.richtig ? ' ist-richtig' : ''}" data-fk="begr" data-i="${i}"${s.phase !== 'begr' ? ' disabled' : ''}>${esc(b.text)}</button>`).join('')}
           </div>` : ''}
-        ${rueck}${erkl}${weiter}`;
+        ${s.phase === 'begr' && !s.begrVersuche ? '' : rueck}${erkl}${weiter}`;
     } else if (a.art === 'fuellen') {
       const voll = Object.values(s.kiste).reduce((x, n) => x + n, 0) >= a.plaetze;
       html = `<p class="wuerfi-sagt">Fülle die Kiste. Es sind immer ${a.plaetze} Kugeln. Dann soll gelten:</p>
@@ -169,6 +169,7 @@
     }
     ziel.innerHTML = html;
     if (a.art === 'vermuten' || a.art === 'verdeckt') diagrammEinsetzen(a, s);
+    T().nachZeichnen(ziel, s, a);
   }
 
   /* Strichliste, Säulendiagramm (mit Tabelle) und Zieh-Knöpfe */
@@ -362,7 +363,7 @@
     } else if (passt) {
       s.rueck = `Deine Vermutung passt zur Kiste. Es sind die meisten Kugeln ${F(a.loesung).adj}. Heute kam trotzdem ${kam} am häufigsten. So ist Zufall. Probier noch einmal ${a.zuege} Züge.`;
     } else {
-      s.rueck = `In der Kiste sind die meisten Kugeln ${F(a.loesung).adj}. Darum ist ${F(a.loesung).name} am wahrscheinlichsten. ${F(s.vermutung).name} kann auch oft kommen, aber eher seltener.`;
+      s.rueck = `In der Kiste sind die meisten Kugeln ${F(a.loesung).adj}. Darum ist ${F(a.loesung).name} am wahrscheinlichsten. ${F(s.vermutung).name} kann auch kommen, nur seltener.`;
     }
     s.erklaerung = `Das hast du vermutet: ${F(s.vermutung).name}. ${ergebnis}.`;
     if (!s.fertig) fertig(a, passt);
@@ -438,7 +439,7 @@
     ctx.zeigen(`
       ${kopf(`Stufe ${STUFENNAME[z.stufe]} · Rundenende`)}
       ${r.html}
-      ${AM_TISCH(true)}`, 'Rundenende – Fühlkiste');
+      ${AM_TISCH(false)}`, 'Rundenende – Fühlkiste');
     ctx.ansagen(r.text);
     if (r.fehler) ctx.melden(ctx.speicherFehlt);
   }

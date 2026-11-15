@@ -97,9 +97,17 @@
       b.appendChild(r);
     }
     b.insertAdjacentHTML('beforeend', vorherHtml(a));
-    if (s.versuch && s.versuch.feld) b.appendChild(zugFeld(s.versuch));
+    if (s.versuch && s.versuch.feld) { b.appendChild(legende('Blau', 'der Zug danach')); b.appendChild(zugFeld(s.versuch)); }
   }
   /* 100 Züge als kleine Reihe aus Buchstaben (B/R), dreimal Blau umrandet, der Zug danach hervorgehoben */
+  /* B15: Legende über dem Feld, damit Rahmen und dunkles Kästchen ohne Erklärung lesbar sind */
+  function legende(was, danachWort) {
+    const p = document.createElement('p');
+    p.className = 'wurf-legende';
+    p.innerHTML = '<span class="wurf-legende__teil"><span class="wurf-feld__wurf ist-reihe" aria-hidden="true">&nbsp;</span> umrandet: dreimal ' + was + ' hintereinander</span>'
+      + '<span class="wurf-legende__teil"><span class="wurf-feld__wurf ist-danach" aria-hidden="true">&nbsp;</span> dunkel: ' + danachWort + '</span>';
+    return p;
+  }
   function zugFeld(v) {
     const d = document.createElement('div');
     d.className = 'wurf-feld';
@@ -196,6 +204,7 @@
       ${s.begrRueck ? `<p class="rueckmeldung">${esc(s.begrRueck)}</p>` : ''}
       ${s.fertig ? `<div class="tipp tipp--schluss">${ctx.wuerfiKlein}<p>${esc(a.schluss)}</p></div><p class="knopfreihe">${weiterKnopf}</p>` : ''}`;
     versuchDarstellen(a);
+    T().nachZeichnen(ziel, s, a);
   }
 
   /* ---------- Bewerten ---------- */
@@ -251,7 +260,7 @@
   function weiter() {
     if (z.i + 1 < z.aufgaben.length) { z.i++; aufgabeZeigen(); return; }
     const r = T().rundenende(ctx, { id: ID, praefix: P, stufe: z.stufe, geschafft: z.geschafft.filter(Boolean).length, anzahl: z.aufgaben.length, stempelSvg: stempelSvg(), gespeichertFehler: z.gespeichertFehler });
-    ctx.zeigen(`${kopf(`Stufe ${STUFENNAME[z.stufe]} · Rundenende`)}${r.html}${AM_TISCH(true)}`, 'Rundenende – Kann das stimmen?');
+    ctx.zeigen(`${kopf(`Stufe ${STUFENNAME[z.stufe]} · Rundenende`)}${r.html}${AM_TISCH(false)}`, 'Rundenende – Kann das stimmen?');
     ctx.ansagen(r.text);
     if (r.fehler) ctx.melden(ctx.speicherFehlt);
   }

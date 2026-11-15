@@ -53,7 +53,37 @@
     ctx.stroke(); ctx.restore();
   }
   /* Verdienter Stempel: Navy-Scheibe mit hellem Ring und gezeichnetem Haken. Offener Stempel: gestrichelter Kreis. */
-  function stempel(ctx, x, y, r, voll) {
+  /* Stempelmotiv einer Station (SVG im Raster 100 × 100, wie im Logbuch) Form für Form aufs Canvas zeichnen.
+     Kein eingebettetes Bild: Die CSP der Seite erlaubt keine data:- oder blob:-Bilder (B14, Etappe 6b). */
+  const STIL = {
+    stempel__rand: { strich: WELLE, breite: 4 }, 'stempel__rand--innen': { strich: WELLE, breite: 2, strichel: [4, 4] },
+    stempel__welle: { strich: NAVY, breite: 3.5 }, stempel__kugel: { fuell: NAVY }
+  };
+  function motivZeichnen(ctx, svgText, x, y, r) {
+    const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+    const k = r / 50;
+    ctx.save();
+    ctx.translate(x - 50 * k, y - 50 * k);
+    ctx.scale(k, k);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    for (const e of doc.querySelectorAll('circle, rect, path, ellipse')) {
+      const klassen = (e.getAttribute('class') || '').split(/\s+/);
+      const stil = Object.assign({}, ...klassen.map(c => STIL[c] || {}));
+      if (!stil.strich && !stil.fuell) continue;
+      const n = a => Number(e.getAttribute(a) || 0);
+      let p;
+      if (e.tagName === 'circle') { p = new Path2D(); p.arc(n('cx'), n('cy'), n('r'), 0, Math.PI * 2); }
+      else if (e.tagName === 'ellipse') { p = new Path2D(); p.ellipse(n('cx'), n('cy'), n('rx'), n('ry'), 0, 0, Math.PI * 2); }
+      else if (e.tagName === 'rect') { p = new Path2D(); if (p.roundRect) p.roundRect(n('x'), n('y'), n('width'), n('height'), n('rx')); else p.rect(n('x'), n('y'), n('width'), n('height')); }
+      else p = new Path2D(e.getAttribute('d') || '');
+      ctx.setLineDash(stil.strichel || []);
+      if (stil.fuell) { ctx.fillStyle = stil.fuell; ctx.fill(p); }
+      if (stil.strich) { ctx.strokeStyle = stil.strich; ctx.lineWidth = stil.breite; ctx.stroke(p); }
+    }
+    ctx.restore();
+  }
+  function stempel(ctx, x, y, r, voll, motiv) {
+    if (voll && motiv) { motivZeichnen(ctx, motiv, x, y, r * 1.12); return; }
     ctx.save();
     if (voll) {
       ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = NAVY; ctx.fill();
@@ -93,7 +123,7 @@
       ctx.textAlign = 'left';
       zeile(ctx, s.name, 190, y + 12, `700 #px ${ANDIKA}`, 36, 440, NAVY);
       ctx.textAlign = 'center';
-      d.stufen.forEach((st, i) => stempel(ctx, xs[i], y, 36, d.hat(s.id, st)));
+      d.stufen.forEach((st, i) => stempel(ctx, xs[i], y, 40, d.hat(s.id, st), d.motiv && d.motiv(s.id)));
       if (r < d.stationen.length - 1) { ctx.strokeStyle = LINIE; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(190, y + dy / 2); ctx.lineTo(1050, y + dy / 2); ctx.stroke(); }
     });
 

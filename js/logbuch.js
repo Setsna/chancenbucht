@@ -33,6 +33,20 @@
     const motiv = id => (CB.stationen && CB.stationen[id] && CB.stationen[id].stempelSvg) ? CB.stationen[id].stempelSvg() : T().stempel('');
     const saetze = verdienteSaetze();
     const fehlt = fehlend();
+    /* B14: Die Urkunde steht oben, sobald sie bereit ist; vorher unten mit dem, was noch fehlt */
+    const urkundeHtml = `
+      <section class="papier logbuch" aria-labelledby="lb-urkunde">
+        <h2 id="lb-urkunde">Urkunde</h2>
+        ${fehlt.length ? `<p>Die Urkunde gibt es, wenn du in jeder Station leicht und mittel geschafft hast.</p><p>Dir fehlen noch: ${esc(fehlt.join(', '))}.</p>`
+          : `<p>Du hast in jeder Station leicht und mittel geschafft. Du kannst dir eine Urkunde machen.</p>
+             <p class="knopfreihe"><button type="button" class="knopf haupt" data-lb="urkunde">Urkunde erstellen</button></p>
+             <p id="lb-status" role="status"></p>
+             <p class="knopfreihe" id="lb-fertig" hidden>
+               <a class="knopf haupt" id="lb-ansehen" href="#" target="_blank" rel="noopener">Urkunde ansehen</a>
+               <button type="button" class="knopf" data-lb="teilen" id="lb-teilen" hidden>Teilen</button>
+             </p>
+             <p class="leise">Die Urkunde macht das Gerät selbst. Sie wird nicht gespeichert und nicht verschickt.</p>`}
+      </section>`;
     ctx.zeigen(`
       <header class="kopf kopf--station">
         <div class="kopf__reihe">
@@ -44,6 +58,7 @@
           <div class="kopf__werkzeug"></div>
         </div>
       </header>
+      ${fehlt.length ? '' : urkundeHtml}
       <section class="papier logbuch" aria-labelledby="lb-stempel">
         <h2 id="lb-stempel">Meine Stempel</h2>
         <ul class="logbuch__tafel">
@@ -67,18 +82,7 @@
           <li><h3>${esc(s.name)}</h3><ul>${saetze.filter(x => x.station === s.id).map(x => `<li>${esc(x.satz)}</li>`).join('')}</ul></li>`).join('')}</ul>`
           : '<p>Hier stehen bald deine ersten Sätze. Such dir eine Station aus.</p>'}
       </section>
-      <section class="papier logbuch" aria-labelledby="lb-urkunde">
-        <h2 id="lb-urkunde">Urkunde</h2>
-        ${fehlt.length ? `<p>Die Urkunde gibt es, wenn du in jeder Station leicht und mittel geschafft hast.</p><p>Dir fehlen noch: ${esc(fehlt.join(', '))}.</p>`
-          : `<p>Du hast in jeder Station leicht und mittel geschafft. Du kannst dir eine Urkunde machen.</p>
-             <p class="knopfreihe"><button type="button" class="knopf haupt" data-lb="urkunde">Urkunde erstellen</button></p>
-             <p id="lb-status" role="status"></p>
-             <p class="knopfreihe" id="lb-fertig" hidden>
-               <a class="knopf haupt" id="lb-ansehen" href="#" target="_blank" rel="noopener">Urkunde ansehen</a>
-               <button type="button" class="knopf" data-lb="teilen" id="lb-teilen" hidden>Teilen</button>
-             </p>
-             <p class="leise">Die Urkunde macht das Gerät selbst. Sie wird nicht gespeichert und nicht verschickt.</p>`}
-      </section>`, 'Mein Logbuch');
+      ${fehlt.length ? urkundeHtml : ''}`, 'Mein Logbuch');
   }
 
   async function urkundeErstellen(knopf) {
@@ -93,7 +97,8 @@
         name: (k && k.name) || 'Forscherin oder Forscher', datum: new Date(),
         stationen: C().stationen.map(s => ({ id: s.id, name: s.name })), stufen: C().stufen.slice(),
         hat: (id, st) => ST().hatStempel(id, st), saetze: verdienteSaetze(),
-        wuerfiSrc: `bilder/wuerfi-512.jpg?b=${C().bildStand}`
+        wuerfiSrc: `bilder/wuerfi-512.jpg?b=${C().bildStand}`,
+        motiv: id => (CB.stationen && CB.stationen[id] && CB.stationen[id].stempelSvg) ? CB.stationen[id].stempelSvg() : null
       });
       if (urkundeUrl) URL.revokeObjectURL(urkundeUrl);
       urkundeUrl = URL.createObjectURL(r.blob);

@@ -79,7 +79,7 @@
     const reihe = document.createElement('div'); reihe.className = 'wuerfel-reihe';
     const letzte = s.letztes || (anzahlWuerfel(a) === 1 ? [6] : [3, 4]);
     letzte.forEach(x => reihe.appendChild(CB.wuerfel.zeichnen(x)));
-    b.appendChild(reihe);
+    if (a.art !== 'forschen') b.appendChild(reihe);
     if (a.art === 'einordnen1') {
       b.appendChild(CB.wuerfel.aufgeklappt(s.fertig || s.seitenAn ? (s.fertig ? a.passend : []) : []));
       const p = document.createElement('p'); p.className = 'rad-ergebnis'; p.textContent = 'Die sechs Seiten des Würfels'; b.appendChild(p);
@@ -134,8 +134,8 @@
         <div class="skala" role="group" aria-label="Wahrscheinlichkeitsskala">
           ${a.antworten.map(w => `<button type="button" class="knopf skala-knopf skala-knopf--${w}${s.skalaRichtig && w === a.loesung ? ' ist-richtig' : ''}" data-wu="skala" data-wert="${w}"${s.phase !== 'start' ? ' disabled' : ''}>${esc(E().wort(w))}</button>`).join('')}
         </div>
-        ${s.phase === 'begr' || s.begrGezeigt ? begrHtml(a, s) : ''}
-        ${rueck}${erkl}${weiter}`;
+        ${s.phase === 'begr' && !s.begrVersuche ? rueck : ''}${s.phase === 'begr' || s.begrGezeigt ? begrHtml(a, s) : ''}
+        ${s.phase === 'begr' && !s.begrVersuche ? '' : rueck}${erkl}${weiter}`;
     } else if (a.art === 'vermuten1' || a.art === 'vermutenSumme') {
       const eins = a.art === 'vermuten1';
       const rest = a.zuege - s.gezogen;
@@ -148,7 +148,7 @@
         <div class="ziehen">
           <p class="knopfreihe">
             <button type="button" class="knopf haupt dreh-knopf" data-wu="wuerfeln" data-n="1"${rest > 0 && !s.wuerfelt ? '' : ' disabled'}>Würfeln</button>
-            <button type="button" class="knopf" data-wu="wuerfeln" data-n="10"${rest > 0 && !s.wuerfelt ? '' : ' disabled'}>${rest > 0 ? Math.min(10, rest) : 10}-mal würfeln</button>
+            ${rest === 1 ? '' : `<button type="button" class="knopf" data-wu="wuerfeln" data-n="10"${rest > 0 && !s.wuerfelt ? '' : ' disabled'}>${rest > 0 ? Math.min(10, rest) : 10}-mal würfeln</button>`}
           </p>
           <p class="leise">${s.gezogen} von ${a.zuege}-mal gewürfelt</p>
           <h3 class="frage-klein">Strichliste</h3>
@@ -176,8 +176,8 @@
         <div class="antworten antworten--zwei" role="group" aria-label="Antworten">
           ${a.antworten.map(x => `<button type="button" class="knopf antwort-knopf${s.antwortRichtig && x.id === a.loesung ? ' ist-richtig' : ''}" data-wu="antwort" data-id="${x.id}"${s.phase !== 'start' ? ' disabled' : ''}>${esc(x.text)}</button>`).join('')}
         </div>
-        ${s.phase === 'begr' || s.begrGezeigt ? begrHtml(a, s) : ''}
-        ${rueck}${erkl}${weiter}`;
+        ${s.phase === 'begr' && !s.begrVersuche ? rueck : ''}${s.phase === 'begr' || s.begrGezeigt ? begrHtml(a, s) : ''}
+        ${s.phase === 'begr' && !s.begrVersuche ? '' : rueck}${erkl}${weiter}`;
     } else if (a.art === 'fair') {
       html = `<p class="aussage" id="wu-frage">${esc(a.satz)}</p>
         <div class="antworten" role="group" aria-label="Antworten">
@@ -194,6 +194,7 @@
         ${rueck}${erkl}${weiter}`;
     }
     ziel.innerHTML = html;
+    T().nachZeichnen(ziel, s, a);
     if ((a.art === 'vermuten1' || a.art === 'vermutenSumme') && s.phase !== 'start') {
       const kat = (a.art === 'vermuten1' ? AUGEN : SUMMEN).map(id => ({ id, name: id, farbe: 'neutral' }));
       diagramm(ctx.app.querySelector('#wu-diagramm'), kat, s.zaehlung, s.schatten, s.hundert ? `${a.zuege}-mal gewürfelt` : (a.art === 'vermuten1' ? 'Gewürfelte Zahlen' : 'Gewürfelte Summen'));
@@ -267,6 +268,7 @@
   function wuerfeln(n) {
     const a = aufgabe(), s = a.zustand;
     if (s.wuerfelt || s.gezogen >= a.zuege) return;
+    s.letzteN = n;
     const anzahl = Math.min(n, a.zuege - s.gezogen);
     const k = anzahlWuerfel(a);
     if (anzahl === 1) {
@@ -291,7 +293,7 @@
     if (s.gezogen >= a.zuege && !s.ausgewertet) { vermutenAuswerten(a, s); ansage += ' ' + s.rueck + ' ' + (s.erklaerung || ''); }
     else s.rueck = ansage;
     zeichneAufgabe(); ctx.ansagen(ansage);
-    fokusAuf(s.fertig ? '[data-wu="weiter"]' : '[data-wu="wuerfeln"]:not([disabled])');
+    fokusAuf(s.fertig ? '[data-wu="weiter"]' : ctx.app.querySelector(`[data-wu="wuerfeln"][data-n="${s.letzteN}"]:not([disabled])`) ? `[data-wu="wuerfeln"][data-n="${s.letzteN}"]` : '[data-wu="wuerfeln"]:not([disabled])');
   }
   function vermutenAuswerten(a, s) {
     s.ausgewertet = true;
@@ -403,7 +405,7 @@
   function weiter() {
     if (z.i + 1 < z.aufgaben.length) { z.i++; aufgabeZeigen(); return; }
     const r = T().rundenende(ctx, { id: ID, praefix: P, stufe: z.stufe, geschafft: z.geschafft.filter(Boolean).length, anzahl: z.aufgaben.length, stempelSvg: stempelSvg(), gespeichertFehler: z.gespeichertFehler });
-    ctx.zeigen(`${kopf(`Stufe ${STUFENNAME[z.stufe]} · Rundenende`)}${r.html}${AM_TISCH(true)}`, 'Rundenende – Würfeln');
+    ctx.zeigen(`${kopf(`Stufe ${STUFENNAME[z.stufe]} · Rundenende`)}${r.html}${AM_TISCH(false)}`, 'Rundenende – Würfeln');
     ctx.ansagen(r.text);
     if (r.fehler) ctx.melden(ctx.speicherFehlt);
   }

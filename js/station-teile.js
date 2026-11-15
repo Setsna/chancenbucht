@@ -79,16 +79,20 @@
     else if (geschafft >= ab) text = 'Runde geschafft. Diesen Stempel hast du schon. Jede Runde übt trotzdem.';
     else text = `Du hast ${geschafft} von ${anzahl} geschafft. Für den Stempel brauchst du ${ab}. Probier noch eine Runde, die Aufgaben sind dann neu.`;
     const weiter = naechste && geschafft >= ab;
+    /* B13: Das Rundenende ist der Höhepunkt: großer Stempel auf Papier im Glasfeld, Würfi daneben, ein Hauptknopf */
+    const haupt = weiter ? { stufe: naechste, text: `Weiter mit ${STUFENNAME[naechste]}` } : { stufe, text: `Noch eine Runde ${STUFENNAME[stufe]}` };
     const html = `
-      <section class="papier rundenende" aria-labelledby="h-ende">
-        <h2 id="h-ende">Rundenende</h2>
+      <section class="rundenende${geschafft >= ab ? ' rundenende--geschafft' : ''}" aria-labelledby="h-ende">
+        <h2 id="h-ende" class="nurvorlesen">Rundenende</h2>
         <div class="stempel-gross${geschafft >= ab || hatteSchon ? ' stempel-gross--voll' : ''}${neu ? ' stempel-gross--neu' : ''}" aria-hidden="true">${stempelSvg}</div>
-        <p class="rundenende__text">${ctx.esc(text)}</p>
+        <div class="rundenende__satz">${ctx.wuerfiKlein}<p class="rundenende__text">${ctx.esc(text)}</p></div>
         <p class="knopfreihe knopfreihe--mitte">
-          ${weiter ? `<button type="button" class="knopf haupt" data-${praefix}="stufe" data-stufe="${naechste}">Weiter mit ${ctx.esc(STUFENNAME[naechste])}</button>` : ''}
-          <button type="button" class="knopf${weiter ? '' : ' haupt'}" data-${praefix}="stufe" data-stufe="${stufe}">Noch eine Runde ${ctx.esc(STUFENNAME[stufe])}</button>
-          <button type="button" class="knopf" data-${praefix}="stufen">Andere Stufe</button>
-          <button type="button" class="knopf" data-aktion="start">Zur Startseite</button>
+          <button type="button" class="knopf haupt rundenende__haupt" data-${praefix}="stufe" data-stufe="${haupt.stufe}">${ctx.esc(haupt.text)}</button>
+        </p>
+        <p class="knopfreihe knopfreihe--mitte rundenende__weitere">
+          ${weiter ? `<button type="button" class="knopf knopf--klein" data-${praefix}="stufe" data-stufe="${stufe}">Noch eine Runde ${ctx.esc(STUFENNAME[stufe])}</button>` : ''}
+          <button type="button" class="knopf knopf--klein" data-${praefix}="stufen">Andere Stufe</button>
+          <button type="button" class="knopf knopf--klein" data-aktion="start">Zur Startseite</button>
         </p>
       </section>`;
     return { html, text, fehler };
@@ -177,5 +181,27 @@
     if (el && !el.disabled) el.focus({ preventScroll: false });
   }
 
-  CB.teile = { PFEIL, STUFENNAME, kugelSymbol, kopf, aufklapper, empfohlen, erstesMal, stufenListe, rundenende, stempel, dialog, tippDialog, woerter, striche, strichliste, diagramm, fokus };
+  /* Nach jedem Zeichnen einer Aufgabe (Etappe 6b):
+     - „Lösung gezeigt“ sieht anders aus als „richtig gelöst“ (Klasse loesung-gezeigt am Aufgabenblatt, A8).
+     - Bei einer richtigen Antwort leuchtet der richtige Knopf einmal ruhig auf (B16): nur transform, kurz,
+       nicht bei reduzierter Bewegung, je Rückmeldung nur einmal. */
+  const RICHTIG = /^(Das stimmt[.:]|Genau\.|Gut geprüft\.|Deine Vermutung passt)/;
+  function nachZeichnen(ziel, s, a) {
+    if (!ziel || !s) return;
+    /* A6: Während eine Versuchsreihe läuft (Vermuten, verdeckte Kiste), bleibt die Bühne im Hochformat oben stehen */
+    const flaeche = ziel.closest('.station-flaeche');
+    if (flaeche) flaeche.classList.toggle('flaeche--versuch', !!(a && a.zuege && s.phase && s.phase !== 'start'));
+    const loesung = s.skalaGeschafft === false || s.zaehlt === false || s.antwortOk === false
+      || (s.fertig && !s.geschafft) || (s.antwortRichtig && !s.geschafft && s.zaehlt !== true);
+    ziel.classList.toggle('loesung-gezeigt', !!loesung);
+    if (!s.rueck || s.rueck === s._geleuchtet || !RICHTIG.test(s.rueck)) return;
+    s._geleuchtet = s.rueck;
+    const ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const el = [...ziel.querySelectorAll('.ist-richtig')].pop() || ziel.querySelector('.rueckmeldung');
+    if (el && !ruhig && typeof el.animate === 'function') {
+      el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.045)' }, { transform: 'scale(1)' }], { duration: 520, easing: 'cubic-bezier(0.2, 0.7, 0.3, 1)' });
+    }
+  }
+
+  CB.teile = { nachZeichnen, PFEIL, STUFENNAME, kugelSymbol, kopf, aufklapper, empfohlen, erstesMal, stufenListe, rundenende, stempel, dialog, tippDialog, woerter, striche, strichliste, diagramm, fokus };
 })();

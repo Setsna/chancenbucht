@@ -35,7 +35,7 @@
     'Werft zwei Chips gleichzeitig, 20-mal. Was kommt öfter: zwei gleiche Seiten oder zwei verschiedene?',
     'Erfindet einen gerechten und einen ungerechten Weg, mit Chip oder Würfel zu entscheiden, wer anfängt.'],
     notiz: 'Material: ein Spielchip mit zwei verschiedenen Seiten (eine Seite mit einem Zeichen bemalt), Stift, Heft.' });
-  const WOERTER_EXTRA = [['gleiche Chance', 'Beide Seiten kommen gleich leicht dran.'], ['fair', 'Beide haben die gleiche Chance.']];
+  const WOERTER_EXTRA = [['gleiche Chance', 'Keine Seite ist im Vorteil.'], ['fair', 'Beide haben die gleiche Chance.']];
   const TISCH_KNOPF = '<button type="button" class="knopf" data-mu="tisch">Mit echtem Wurf vergleichen</button>';
   const stempelSvg = () => T().stempel('<circle class="stempel__welle" cx="50" cy="50" r="17"/><path class="stempel__welle" d="M38 55 q3 -4 6 0 t6 0 t6 0 t6 0"/><path class="stempel__welle" d="M46 39 L51 35 L51 49"/>');
 
@@ -94,7 +94,7 @@
       } else p(s.letztes ? `Geworfen: ${NAME[s.letztes]}.` : '', 'mu-ergebnis');
     } else if (a.art === 'dreimal' || a.art === 'reihe') {
       b.insertAdjacentHTML('beforeend', reiheHtml(a.reihe, a.art === 'dreimal'));
-      if (a.art === 'dreimal' && s.versuch) b.appendChild(wurfFeld(s.versuch, a.seite));
+      if (a.art === 'dreimal' && s.versuch) { b.appendChild(legende(NAME[a.seite], 'der Wurf danach')); b.appendChild(wurfFeld(s.versuch, a.seite)); }
     } else if (a.art === 'haelfte') {
       const m = document.createElement('div'); m.className = 'muenz-gross'; m.appendChild(CB.muenze.zeichnen('kopf')); b.appendChild(m);
       if (s.versuch) b.appendChild(serienTabelle(a, s.versuch));
@@ -115,6 +115,14 @@
     }
   }
   /* 100 Würfe als kleine Reihe K/Z; Stellen mit dreimal <seite> umrandet, der Wurf danach hervorgehoben */
+  /* B15: Legende über dem Feld, damit Rahmen und dunkles Kästchen ohne Erklärung lesbar sind */
+  function legende(was, danachWort) {
+    const p = document.createElement('p');
+    p.className = 'wurf-legende';
+    p.innerHTML = '<span class="wurf-legende__teil"><span class="wurf-feld__wurf ist-reihe" aria-hidden="true">&nbsp;</span> umrandet: dreimal ' + was + ' hintereinander</span>'
+      + '<span class="wurf-legende__teil"><span class="wurf-feld__wurf ist-danach" aria-hidden="true">&nbsp;</span> dunkel: ' + danachWort + '</span>';
+    return p;
+  }
   function wurfFeld(v, seite) {
     const d = document.createElement('div');
     d.className = 'wurf-feld';
@@ -166,8 +174,8 @@
         <div class="skala skala--drei" role="group" aria-label="Antworten">
           ${a.antworten.map(x => `<button type="button" class="knopf skala-knopf skala-knopf--${x.id}${s.skalaRichtig && x.id === a.loesung ? ' ist-richtig' : ''}" data-mu="skala" data-id="${x.id}"${s.phase !== 'start' ? ' disabled' : ''}>${esc(x.text)}</button>`).join('')}
         </div>
-        ${s.phase === 'begr' || s.begrGezeigt ? begrHtml(a, s) : ''}
-        ${rueck}${erkl}${weiter}`;
+        ${s.phase === 'begr' && !s.begrVersuche ? rueck : ''}${s.phase === 'begr' || s.begrGezeigt ? begrHtml(a, s) : ''}
+        ${s.phase === 'begr' && !s.begrVersuche ? '' : rueck}${erkl}${weiter}`;
     } else if (a.art === 'vermuten') {
       const rest = a.zuege - s.gezogen;
       html = `<p class="wuerfi-sagt">Erst vermuten, dann werfen.</p>
@@ -179,7 +187,7 @@
         <div class="ziehen">
           <p class="knopfreihe">
             <button type="button" class="knopf haupt dreh-knopf" data-mu="werfen" data-n="1"${rest > 0 && !s.wirft ? '' : ' disabled'}>Werfen</button>
-            <button type="button" class="knopf" data-mu="werfen" data-n="10"${rest > 0 && !s.wirft ? '' : ' disabled'}>${rest > 0 ? Math.min(10, rest) : 10}-mal werfen</button>
+            ${rest === 1 ? '' : `<button type="button" class="knopf" data-mu="werfen" data-n="10"${rest > 0 && !s.wirft ? '' : ' disabled'}>${rest > 0 ? Math.min(10, rest) : 10}-mal werfen</button>`}
           </p>
           <p class="leise">${s.gezogen} von ${a.zuege}-mal geworfen</p>
           <h3 class="frage-klein">Strichliste</h3>
@@ -229,6 +237,7 @@
         ${s.fertig ? `<p class="knopfreihe">${s.spiel ? '' : `<button type="button" class="knopf" data-mu="spielen">${a.runden}-mal ausprobieren</button>`}${weiterKnopf}</p>` : ''}`;
     }
     ziel.innerHTML = html;
+    T().nachZeichnen(ziel, s, a);
     if (a.art === 'vermuten' && s.phase !== 'start') {
       diagramm(ctx.app.querySelector('#mu-diagramm'), s.zaehlung, s.schatten, s.hundert ? `${a.zuege}-mal geworfen` : 'Geworfene Seiten');
       if (s.hundert) diagramm(ctx.app.querySelector('#mu-diagramm-100'), s.hundert, null, '100-mal geworfen');
@@ -308,6 +317,7 @@
   function werfen(n) {
     const a = aufgabe(), s = a.zustand;
     if (s.wirft || s.gezogen >= a.zuege) return;
+    s.letzteN = n;
     const anzahl = Math.min(n, a.zuege - s.gezogen);
     if (anzahl === 1) {
       const w = Z().wirf();   /* Ergebnis steht fest, bevor die Münze sich dreht */
@@ -329,7 +339,7 @@
     if (s.gezogen >= a.zuege && !s.ausgewertet) { vermutenAuswerten(a, s); ansage += ' ' + s.rueck + ' ' + (s.erklaerung || ''); }
     else s.rueck = ansage;
     zeichneAufgabe(); ctx.ansagen(ansage);
-    fokusAuf(s.fertig ? '[data-mu="weiter"]' : '[data-mu="werfen"]:not([disabled])');
+    fokusAuf(s.fertig ? '[data-mu="weiter"]' : ctx.app.querySelector(`[data-mu="werfen"][data-n="${s.letzteN}"]:not([disabled])`) ? `[data-mu="werfen"][data-n="${s.letzteN}"]` : '[data-mu="werfen"]:not([disabled])');
   }
   function vermutenAuswerten(a, s) {
     s.ausgewertet = true;
@@ -457,7 +467,7 @@
   function weiter() {
     if (z.i + 1 < z.aufgaben.length) { z.i++; aufgabeZeigen(); return; }
     const r = T().rundenende(ctx, { id: ID, praefix: P, stufe: z.stufe, geschafft: z.geschafft.filter(Boolean).length, anzahl: z.aufgaben.length, stempelSvg: stempelSvg(), gespeichertFehler: z.gespeichertFehler });
-    ctx.zeigen(`${kopf(`Stufe ${STUFENNAME[z.stufe]} · Rundenende`)}${r.html}<p class="knopfreihe knopfreihe--mitte">${TISCH_KNOPF}</p>${AM_TISCH(true)}`, 'Rundenende – Münzwurf');
+    ctx.zeigen(`${kopf(`Stufe ${STUFENNAME[z.stufe]} · Rundenende`)}${r.html}<p class="knopfreihe knopfreihe--mitte">${TISCH_KNOPF}</p>${AM_TISCH(false)}`, 'Rundenende – Münzwurf');
     ctx.ansagen(r.text);
     if (r.fehler) ctx.melden(ctx.speicherFehlt);
   }

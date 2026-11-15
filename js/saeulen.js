@@ -34,7 +34,7 @@
     const { schritt, oben } = skala(Math.max(...w, ...(s || [0])));
 
     const n = kategorien.length;
-    const LINKS = 44, UNTEN = 34, OBEN = 22, HOEHE = 200;
+    const LINKS = 56, UNTEN = 40, OBEN = 28, HOEHE = 200;
     const spalte = Math.max(40, Math.min(72, 560 / n));
     const B = LINKS + n * spalte + 12, H = OBEN + HOEHE + UNTEN;
     const y = v => OBEN + HOEHE - (v / oben) * HOEHE;
@@ -78,6 +78,17 @@
     };
     zeile(s ? `${einheit} jetzt` : einheit, w);
     if (s) zeile(`${einheit} vorher`, s);
+
+    /* Schrift gerendert mindestens etwa 14 px, egal wie breit das Diagramm angezeigt wird (Handy bis Tafel).
+       Gesetzt als SVG-Attribut font-size (kein style-Attribut, CSP), neu bei jeder Größenänderung. */
+    const anpassen = () => {
+      const breite = svg.getBoundingClientRect().width;
+      if (!breite) return;
+      const gr = Math.round(Math.min(26, Math.max(15, 14 * B / breite)) * 10) / 10;
+      svg.querySelectorAll('text').forEach(t => t.setAttribute('font-size', gr));
+    };
+    svg.querySelectorAll('text').forEach(t => t.setAttribute('font-size', 15));
+    if (typeof ResizeObserver === 'function') new ResizeObserver(anpassen).observe(svg);
 
     return { svg, tabelle, skala: { schritt, oben } };
   }

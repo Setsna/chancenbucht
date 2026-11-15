@@ -66,6 +66,6 @@
     rundenMax: 100000,
 
     /* Versionsnummer der Bilder, getrennt von ?v=N für js und css */
-    bildStand: 2
+    bildStand: 3
   };
 })();

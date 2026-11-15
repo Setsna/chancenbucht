@@ -12,22 +12,22 @@
   <meta name="theme-color" content="#0e2f45">
   <title>Chancenbucht</title>
   <meta name="description" content="Zufall und Wahrscheinlichkeit für Klasse 3: erst vermuten, dann ziehen, drehen, würfeln und zählen. Anmeldung mit dem Code der Klasse, ohne Werbung, ohne Rangliste.">
-  <link rel="icon" href="bilder/favicon-64.png?b=2">
+  <link rel="icon" href="bilder/favicon-64.png?b=3">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="bilder/app-180.png?b=2">
+  <link rel="apple-touch-icon" href="bilder/app-180.png?b=3">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Chancenbucht">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preload" href="schriften/andika-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="schriften/libre-caslon-text.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/tokens.css?v=10">
-  <link rel="stylesheet" href="css/chancenbucht.css?v=10">
-  <link rel="stylesheet" href="css/station.css?v=10">
-  <script src="js/fehler.js?v=10"></script>
-  <script src="js/konto-abgleich.js?v=10"></script>
-  <script src="js/konto-speicher.js?v=10"></script>
-  <script src="js/konto-cloud.js?v=10"></script>
+  <link rel="stylesheet" href="css/tokens.css?v=19">
+  <link rel="stylesheet" href="css/chancenbucht.css?v=19">
+  <link rel="stylesheet" href="css/station.css?v=19">
+  <script src="js/fehler.js?v=19"></script>
+  <script src="js/konto-abgleich.js?v=19"></script>
+  <script src="js/konto-speicher.js?v=19"></script>
+  <script src="js/konto-cloud.js?v=19"></script>
   <!-- Firebase für das gemeinsame Konto, dieselbe Version und Prüfsumme wie im Perlentaucher und den anderen Plattformen.
        defer: Sie laden nach den eigenen Skripten und halten die Seite nicht auf (js/konto-cloud.js wartet auf sie). -->
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" integrity="sha384-ZaR6mWzmJtrRibZ1Vm7SoHFr8OXjyAuGAXalGDKqbxFT18oi/z+oZLIRFkpeNor1" crossorigin="anonymous"></script>
@@ -36,10 +36,10 @@
 </head>
 <body class="lagune">
   <picture class="wasser" aria-hidden="true">
-    <source media="(orientation: landscape)" srcset="bilder/bucht-quer.webp?b=2" type="image/webp">
-    <source media="(orientation: landscape)" srcset="bilder/bucht-quer.jpg?b=2">
-    <source srcset="bilder/bucht-hoch.webp?b=2" type="image/webp">
-    <img src="bilder/bucht-hoch.jpg?b=2" alt="" width="1088" height="1444" decoding="async">
+    <source media="(orientation: landscape)" srcset="bilder/bucht-quer.webp?b=3" type="image/webp">
+    <source media="(orientation: landscape)" srcset="bilder/bucht-quer.jpg?b=3">
+    <source srcset="bilder/bucht-hoch.webp?b=3" type="image/webp">
+    <img src="bilder/bucht-hoch.jpg?b=3" alt="" width="1088" height="1444" decoding="async">
   </picture>
   <div class="licht" aria-hidden="true"></div>
   <div class="blasen" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
@@ -59,29 +59,29 @@
   <div id="live" class="nurvorlesen" aria-live="polite" aria-atomic="true"></div>
   <footer class="fuss"><a href="impressum.html">Impressum</a> <a href="datenschutz.html">Datenschutz</a></footer>
   <!-- Eigene Skripte am Ende: Sie brauchen #app. Firebase (oben, defer) kommt danach, js/konto-cloud.js wartet darauf. -->
-  <script src="js/config.js?v=10"></script>
-  <script src="js/zufall.js?v=10"></script>
-  <script src="js/einordnung.js?v=10"></script>
-  <script src="js/erwachsene.js?v=10"></script>
-  <script src="js/cb-stand.js?v=10"></script>
-  <script src="js/kiste.js?v=10"></script>
-  <script src="js/saeulen.js?v=10"></script>
-  <script src="js/rad.js?v=10"></script>
-  <script src="js/wuerfel.js?v=10"></script>
-  <script src="js/muenze.js?v=10"></script>
-  <script src="js/station-teile.js?v=10"></script>
-  <script src="js/stationen/fuehlkiste-aufgaben.js?v=10"></script>
-  <script src="js/stationen/fuehlkiste.js?v=10"></script>
-  <script src="js/stationen/gluecksrad-aufgaben.js?v=10"></script>
-  <script src="js/stationen/gluecksrad.js?v=10"></script>
-  <script src="js/stationen/wuerfeln-aufgaben.js?v=10"></script>
-  <script src="js/stationen/wuerfeln.js?v=10"></script>
-  <script src="js/stationen/muenze-aufgaben.js?v=10"></script>
-  <script src="js/stationen/muenze.js?v=10"></script>
-  <script src="js/stationen/denkfehler-aufgaben.js?v=10"></script>
-  <script src="js/stationen/denkfehler.js?v=10"></script>
-  <script src="js/urkunde.js?v=10"></script>
-  <script src="js/logbuch.js?v=10"></script>
-  <script src="js/app.js?v=10"></script>
+  <script src="js/config.js?v=19"></script>
+  <script src="js/zufall.js?v=19"></script>
+  <script src="js/einordnung.js?v=19"></script>
+  <script src="js/erwachsene.js?v=19"></script>
+  <script src="js/cb-stand.js?v=19"></script>
+  <script src="js/kiste.js?v=19"></script>
+  <script src="js/saeulen.js?v=19"></script>
+  <script src="js/rad.js?v=19"></script>
+  <script src="js/wuerfel.js?v=19"></script>
+  <script src="js/muenze.js?v=19"></script>
+  <script src="js/station-teile.js?v=19"></script>
+  <script src="js/stationen/fuehlkiste-aufgaben.js?v=19"></script>
+  <script src="js/stationen/fuehlkiste.js?v=19"></script>
+  <script src="js/stationen/gluecksrad-aufgaben.js?v=19"></script>
+  <script src="js/stationen/gluecksrad.js?v=19"></script>
+  <script src="js/stationen/wuerfeln-aufgaben.js?v=19"></script>
+  <script src="js/stationen/wuerfeln.js?v=19"></script>
+  <script src="js/stationen/muenze-aufgaben.js?v=19"></script>
+  <script src="js/stationen/muenze.js?v=19"></script>
+  <script src="js/stationen/denkfehler-aufgaben.js?v=19"></script>
+  <script src="js/stationen/denkfehler.js?v=19"></script>
+  <script src="js/urkunde.js?v=19"></script>
+  <script src="js/logbuch.js?v=19"></script>
+  <script src="js/app.js?v=19"></script>
 </body>
 </html>

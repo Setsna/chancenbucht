@@ -115,12 +115,12 @@
         <div class="skala" role="group" aria-label="Wahrscheinlichkeitsskala">
           ${a.antworten.map(w => `<button type="button" class="knopf skala-knopf skala-knopf--${w}${s.skalaRichtig && w === a.loesung ? ' ist-richtig' : ''}" data-gr="skala" data-wert="${w}"${s.phase !== 'start' ? ' disabled' : ''}>${esc(E().wort(w))}</button>`).join('')}
         </div>
-        ${s.phase === 'begr' || s.begrGezeigt ? `
+        ${s.phase === 'begr' && !s.begrVersuche ? rueck : ''}${s.phase === 'begr' || s.begrGezeigt ? `
           <h2 class="frage-klein">Warum? Tippe den passenden Satz an.</h2>
           <div class="begruendungen" role="group" aria-label="Begründungen">
             ${a.begruendungen.map((b, i) => `<button type="button" class="knopf begr-knopf${s.begrRichtig && b.richtig ? ' ist-richtig' : ''}" data-gr="begr" data-i="${i}"${s.phase !== 'begr' ? ' disabled' : ''}>${esc(b.text)}</button>`).join('')}
           </div>` : ''}
-        ${rueck}${erkl}${weiter}`;
+        ${s.phase === 'begr' && !s.begrVersuche ? '' : rueck}${erkl}${weiter}`;
     } else if (a.art === 'gestalten') {
       const n = s.felder.length, voll = n >= a.plaetze;
       html = `<p class="wuerfi-sagt">Färbe das Rad. Es hat ${a.plaetze} Felder. Dann soll gelten:</p>
@@ -145,7 +145,7 @@
         <div class="ziehen">
           <p class="knopfreihe">
             <button type="button" class="knopf haupt dreh-knopf" data-gr="drehen" data-n="1"${offen && !s.dreht ? '' : ' disabled'}>Drehen</button>
-            <button type="button" class="knopf" data-gr="drehen" data-n="10"${offen && !s.dreht ? '' : ' disabled'}>${Math.min(10, Math.max(1, a.zuege - s.gezogen))}-mal drehen</button>
+            ${a.zuege - s.gezogen === 1 ? '' : `<button type="button" class="knopf" data-gr="drehen" data-n="10"${offen && !s.dreht ? '' : ' disabled'}>${a.zuege - s.gezogen > 0 ? Math.min(10, a.zuege - s.gezogen) : 10}-mal drehen</button>`}
           </p>
           <p class="leise">${s.gezogen} von ${a.zuege}-mal gedreht</p>
           <h3 class="frage-klein">Strichliste</h3>
@@ -173,6 +173,7 @@
         ${rueck}${erkl}${weiter}`;
     }
     ziel.innerHTML = html;
+    T().nachZeichnen(ziel, s, a);
     if (a.art === 'vermuten' && s.phase !== 'start') {
       T().diagramm(ctx.app.querySelector('#gr-diagramm'), a.antworten, s.zaehlung, s.schatten, s.hundert ? `${a.zuege}-mal gedreht` : 'Wo das Rad stehen blieb');
       if (s.hundert) T().diagramm(ctx.app.querySelector('#gr-diagramm-100'), a.antworten, s.hundert, null, '100-mal gedreht');
@@ -292,6 +293,7 @@
   function drehen(n) {
     const a = aufgabe(), s = a.zustand;
     if (s.dreht || s.fertig) return;
+    s.letzteN = n;
     const anzahl = Math.min(n, a.zuege - s.gezogen);
     if (anzahl < 1) return;
     if (anzahl === 1) {
@@ -319,7 +321,7 @@
     else s.rueck = ansage;
     zeichneAufgabe();
     ctx.ansagen(ansage);
-    fokusAuf(s.fertig ? '[data-gr="weiter"]' : '[data-gr="drehen"]:not([disabled])');
+    fokusAuf(s.fertig ? '[data-gr="weiter"]' : ctx.app.querySelector(`[data-gr="drehen"][data-n="${s.letzteN}"]:not([disabled])`) ? `[data-gr="drehen"][data-n="${s.letzteN}"]` : '[data-gr="drehen"]:not([disabled])');
   }
   function vermutenAuswerten(a, s) {
     s.ausgewertet = true;
@@ -329,7 +331,7 @@
     const kam = oben.map(f => F(f).name).join(' und ');
     if (passt && oben.length === 1 && oben[0] === a.loesung) s.rueck = `Deine Vermutung passt zum Rad. Die meisten Felder sind ${F(a.loesung).adj}. Heute kam ${kam} auch am häufigsten.`;
     else if (passt) s.rueck = `Deine Vermutung passt zum Rad. Die meisten Felder sind ${F(a.loesung).adj}. Heute kam trotzdem ${kam} am häufigsten. So ist Zufall.`;
-    else s.rueck = `Die meisten Felder sind ${F(a.loesung).adj}. Darum hat ${F(a.loesung).name} die größte Chance. ${F(s.vermutung).name} kann auch oft kommen, aber eher seltener.`;
+    else s.rueck = `Die meisten Felder sind ${F(a.loesung).adj}. Darum hat ${F(a.loesung).name} die größte Chance. ${F(s.vermutung).name} kann auch kommen, nur seltener.`;
     s.erklaerung = `Das hast du vermutet: ${F(s.vermutung).name}. Das ist passiert: ` + a.antworten.map(f => `${F(f).name} ${s.zaehlung[f] || 0}`).join(' · ') + '.';
     if (!s.fertig) fertig(a, passt);
     s.fertig = true;
@@ -379,7 +381,7 @@
   function weiter() {
     if (z.i + 1 < z.aufgaben.length) { z.i++; aufgabeZeigen(); return; }
     const r = T().rundenende(ctx, { id: ID, praefix: P, stufe: z.stufe, geschafft: z.geschafft.filter(Boolean).length, anzahl: z.aufgaben.length, stempelSvg: stempelSvg(), gespeichertFehler: z.gespeichertFehler });
-    ctx.zeigen(`${kopf(`Stufe ${STUFENNAME[z.stufe]} · Rundenende`)}${r.html}${AM_TISCH(true)}`, 'Rundenende – Glücksrad');
+    ctx.zeigen(`${kopf(`Stufe ${STUFENNAME[z.stufe]} · Rundenende`)}${r.html}${AM_TISCH(false)}`, 'Rundenende – Glücksrad');
     ctx.ansagen(r.text);
     if (r.fehler) ctx.melden(ctx.speicherFehlt);
   }
