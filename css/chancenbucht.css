@@ -364,3 +364,13 @@ details[open] > summary::after { transform: translateY(25%) rotate(-135deg); }
 /* 6b: keine einzelnen Wörter allein in der letzten Zeile (Schusterjungen); ältere Browser ignorieren es */
 p, li, dd, figcaption { text-wrap: pretty; }
 h1, h2, h3 { text-wrap: balance; }
+
+/* ---------- Etappe 6c (Finish-Review) ---------- */
+/* Querformat: Kartentitel unten bündig, damit Trennlinie und Unterzeile aller Karten auf einer Höhe liegen,
+   auch wenn „Kann das stimmen?“ zweizeilig ist */
+@media (orientation: landscape) and (min-width: 820px) {
+  .station__name { min-height: 2.6em; display: flex; align-items: flex-end; justify-content: center; }
+}
+/* Fokus auf dem Titel nach dem Weiterblättern: Ring bleibt, aber rund und mit Abstand (kein „Auswahlkasten“) */
+h1[tabindex="-1"] { border-radius: 0.6rem; }
+h1[tabindex="-1"]:focus-visible { outline-offset: 6px; }

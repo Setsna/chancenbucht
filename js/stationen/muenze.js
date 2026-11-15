@@ -168,8 +168,7 @@
     const knoepfe = (aktion, dis, mark) => a.antworten.map(x => `<button type="button" class="knopf antwort-knopf${mark && x.id === a.loesung ? ' ist-richtig' : ''}" data-mu="${aktion}" data-id="${x.id}"${dis ? ' disabled' : ''}>${esc(x.text)}</button>`).join('');
     let html = '';
     if (a.art === 'einordnen') {
-      html = `<p class="wuerfi-sagt">Würfi sagt:</p>
-        <p class="aussage" id="mu-frage">${esc(a.satz)}</p>
+      html = `<div class="wuerfi-aussage">${ctx.wuerfiKlein}<div><p class="nurvorlesen">Würfi sagt:</p><p class="aussage" id="mu-frage">${esc(a.satz)}</p></div></div>
         <h2 class="frage-klein">Wie wahrscheinlich ist das?</h2>
         <div class="skala skala--drei" role="group" aria-label="Antworten">
           ${a.antworten.map(x => `<button type="button" class="knopf skala-knopf skala-knopf--${x.id}${s.skalaRichtig && x.id === a.loesung ? ' ist-richtig' : ''}" data-mu="skala" data-id="${x.id}"${s.phase !== 'start' ? ' disabled' : ''}>${esc(x.text)}</button>`).join('')}
@@ -178,17 +177,17 @@
         ${s.phase === 'begr' && !s.begrVersuche ? '' : rueck}${erkl}${weiter}`;
     } else if (a.art === 'vermuten') {
       const rest = a.zuege - s.gezogen;
-      html = `<p class="wuerfi-sagt">Erst vermuten, dann werfen.</p>
+      html = `<p class="auftrag">Erst vermuten, dann werfen.</p>
         <p class="aussage" id="mu-frage">Wir werfen ${a.zuege}-mal. Was kommt wohl öfter?</p>
         <div class="antworten" role="group" aria-label="Deine Vermutung">
           ${a.antworten.map(x => `<button type="button" class="knopf antwort-knopf" data-mu="vermuten" data-id="${x.id}" aria-pressed="${s.vermutung === x.id}"${s.phase !== 'start' ? ' disabled' : ''}>${esc(x.text)}</button>`).join('')}
         </div>
         ${s.phase === 'start' ? `<p class="knopfreihe"><button type="button" class="knopf haupt" data-mu="vermutung-fest"${s.vermutung ? '' : ' disabled'}>Ich bin fertig mit Vermuten</button></p>` : `
         <div class="ziehen">
-          <p class="knopfreihe">
+          ${s.fertig ? `${rueck}${erkl}<p class="knopfreihe">${s.schatten || s.hundert ? '' : '<button type="button" class="knopf" data-mu="noch20">Noch einmal 20</button>'}${s.hundert ? '' : '<button type="button" class="knopf" data-mu="hundert">Jetzt 100-mal werfen</button>'}${weiterKnopf}</p>` : `<p class="knopfreihe">
             <button type="button" class="knopf haupt dreh-knopf" data-mu="werfen" data-n="1"${rest > 0 && !s.wirft ? '' : ' disabled'}>Werfen</button>
             ${rest === 1 ? '' : `<button type="button" class="knopf" data-mu="werfen" data-n="10"${rest > 0 && !s.wirft ? '' : ' disabled'}>${rest > 0 ? Math.min(10, rest) : 10}-mal werfen</button>`}
-          </p>
+          </p>`}
           <p class="leise">${s.gezogen} von ${a.zuege}-mal geworfen</p>
           <h3 class="frage-klein">Strichliste</h3>
           ${strichliste(s.zaehlung)}
@@ -198,19 +197,16 @@
           </div>
           ${s.hundert ? '<p>Vergleich die beiden Diagramme.</p>' : s.schatten ? '<p>Vergleich die beiden Male. Sind sie gleich?</p>' : ''}
         </div>`}
-        ${rueck}${erkl}
-        ${s.fertig ? `<p class="knopfreihe">${s.schatten || s.hundert ? '' : '<button type="button" class="knopf" data-mu="noch20">Noch einmal 20</button>'}${s.hundert ? '' : '<button type="button" class="knopf" data-mu="hundert">Jetzt 100-mal werfen</button>'}${weiterKnopf}</p>` : ''}`;
+        ${s.fertig ? '' : rueck + erkl}`;
     } else if (a.art === 'dreimal') {
-      html = `<p class="wuerfi-sagt">Würfi sagt:</p>
-        <p class="aussage" id="mu-frage">${esc(a.satz)}</p>
+      html = `<div class="wuerfi-aussage">${ctx.wuerfiKlein}<div><p class="nurvorlesen">Würfi sagt:</p><p class="aussage" id="mu-frage">${esc(a.satz)}</p></div></div>
         <h2 class="frage-klein">${esc(a.frage)}</h2>
         <div class="antworten" role="group" aria-label="Antworten">${knoepfe('antwort', s.phase !== 'start', s.phase !== 'start')}</div>
         ${rueck}
         ${s.phase !== 'start' ? versuchHtml(a, s) : ''}
         ${erkl}${s.fertig ? `<p class="knopfreihe">${s.versuch ? '<button type="button" class="knopf" data-mu="versuch">Noch einmal 100</button>' : ''}${weiterKnopf}</p>` : ''}`;
     } else if (a.art === 'haelfte' || a.art === 'reihe') {
-      html = `<p class="wuerfi-sagt">Würfi sagt:</p>
-        <p class="aussage" id="mu-frage">${esc(a.satz)}</p>
+      html = `<div class="wuerfi-aussage">${ctx.wuerfiKlein}<div><p class="nurvorlesen">Würfi sagt:</p><p class="aussage" id="mu-frage">${esc(a.satz)}</p></div></div>
         <h2 class="frage-klein">${a.art === 'haelfte' ? 'Stimmt das?' : 'Kann das stimmen?'}</h2>
         <div class="antworten${a.art === 'reihe' ? ' antworten--zwei' : ''}" role="group" aria-label="Antworten">${knoepfe('antwort', s.phase !== 'start', s.phase !== 'start')}</div>
         ${rueck}
@@ -456,9 +452,9 @@
       if (a.passtWuerfi(x)) sp.wuerfi++; else if (a.passtKind(x)) sp.kind++;
     }
     sp.text = `Würfi hat ${sp.wuerfi}-mal angefangen, du ${sp.kind}-mal.` +
-      (a.loesung === 'wuerfi' && sp.kind > sp.wuerfi ? ' Diesmal warst du öfter dran. Trotzdem hat Würfi die größere Chance.' : '') +
-      (a.loesung === 'kind' && sp.wuerfi > sp.kind ? ' Diesmal war Würfi öfter dran. Trotzdem hast du die größere Chance.' : '') +
-      (a.loesung === 'fair' ? ' Beide haben die gleiche Chance. Wer öfter dran war, ist Zufall.' : '');
+      (a.loesung === 'wuerfi' && sp.kind > sp.wuerfi ? ' Diesmal hast du öfter einen Strich bekommen. Trotzdem hat Würfi die größere Chance.' : '') +
+      (a.loesung === 'kind' && sp.wuerfi > sp.kind ? ' Diesmal hat Würfi öfter einen Strich bekommen. Trotzdem hast du die größere Chance.' : '') +
+      (a.loesung === 'fair' ? ' Beide haben die gleiche Chance. Wer öfter einen Strich bekommt, ist Zufall.' : '');
     s.spiel = sp;
     zeichneAufgabe(); ctx.ansagen(sp.text);
     fokusAuf('[data-mu="weiter"]');
@@ -485,8 +481,7 @@
     ctx.zeigen(`
       ${kopf('Mit echtem Wurf vergleichen')}
       <section class="papier tisch" aria-labelledby="mu-tisch-frage">
-        <p class="wuerfi-sagt">Würfi sagt:</p>
-        <p class="aussage" id="mu-tisch-frage">Nimm einen Spielchip mit zwei Seiten. Wirf ihn ${TISCH_WUERFE}-mal. Tippe nach jedem Wurf, was oben liegt.</p>
+        <div class="wuerfi-aussage">${ctx.wuerfiKlein}<div><p class="nurvorlesen">Würfi sagt:</p><p class="aussage" id="mu-tisch-frage">Nimm einen Spielchip mit zwei Seiten. Wirf ihn ${TISCH_WUERFE}-mal. Tippe nach jedem Wurf, was oben liegt.</p></div></div>
         <p>Die Seite mit dem Zeichen ist Kopf.</p>
         <p class="knopfreihe">
           <button type="button" class="knopf haupt dreh-knopf" data-mu="tisch-wurf" data-seite="kopf"${voll ? ' disabled' : ''}>Kopf</button>

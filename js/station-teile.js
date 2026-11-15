@@ -26,7 +26,7 @@
           ${PFEIL}
           <div class="kopf__mitte">
             <h1>${ctx.esc(titel)}</h1>
-            ${unterzeile ? `<p class="unterzeile">${ctx.esc(unterzeile)}</p>` : ''}
+            ${unterzeile ? `<p class="unterzeile">${ctx.esc(unterzeile).replace(/(Aufgabe \d+ von \d+)/, '<span class="zusammen">$1</span>')}</p>` : ''}
           </div>
           <div class="kopf__werkzeug">
             <button type="button" class="knopf glas-knopf werkzeug-knopf" data-${praefix}="woerter" aria-haspopup="dialog">Wörter</button>

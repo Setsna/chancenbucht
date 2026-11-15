@@ -35,7 +35,7 @@
     'Legt zwei rote und zwei blaue Steckwürfel in einen Beutel. Zieht, schreibt auf und legt immer zurück.',
     'Zieht 40-mal. Sucht in eurer Liste alle Stellen mit dreimal Blau. Was kam danach?',
     'Erfindet eine eigene Behauptung über den Zufall. Kann euer Partner sie prüfen?'], notiz: 'Material: Beutel, Steckwürfel in zwei Farben, Stift, Heft.' });
-  const WOERTER_EXTRA = [['gleiche Chance', 'Beides kommt gleich leicht dran.'], ['größere Chance', 'Das kommt eher dran.']];
+  const WOERTER_EXTRA = [['gleiche Chance', 'Keins ist im Vorteil.'], ['größere Chance', 'Das passiert eher als das andere.']];
   const stempelSvg = () => T().stempel('<circle class="stempel__welle" cx="45" cy="45" r="13"/><path class="stempel__welle" d="M54 54 L66 66"/><path class="stempel__welle" d="M41 41 q4 -6 8 -1 q2 4 -4 6 l0 3"/><circle class="stempel__kugel" cx="45" cy="53" r="1.8"/>');
 
   /* ---------- Stufenwahl ---------- */
@@ -187,8 +187,7 @@
     const weiterKnopf = `<button type="button" class="knopf haupt" data-df="weiter">${z.i + 1 < z.aufgaben.length ? 'Weiter' : 'Zum Rundenende'}</button>`;
     const antwortGesperrt = s.phase !== 'start';
     const versuchFrei = s.phase === 'versuch' || (s.frueh && s.phase === 'start');
-    ziel.innerHTML = `<p class="wuerfi-sagt">Würfi sagt:</p>
-      <p class="aussage" id="df-frage">„${esc(a.behauptung)}“</p>
+    ziel.innerHTML = `<div class="wuerfi-aussage">${ctx.wuerfiKlein}<div><p class="nurvorlesen">Würfi sagt:</p><p class="aussage" id="df-frage">„${esc(a.behauptung)}“</p></div></div>
       <h2 class="frage-klein">Kann das stimmen?</h2>
       <div class="antworten antworten--zwei" role="group" aria-label="Antworten">
         ${a.antworten.map(x => `<button type="button" class="knopf antwort-knopf${s.antwortRichtig && x.id === a.loesung ? ' ist-richtig' : ''}" data-df="antwort" data-id="${x.id}"${antwortGesperrt ? ' disabled' : ''}>${esc(x.text)}</button>`).join('')}

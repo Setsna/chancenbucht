@@ -37,8 +37,8 @@
     'Vermute zuerst, dann dreh 20-mal und mach eine Strichliste.',
     'Male ein neues Rad, bei dem Rot und Blau die gleiche Chance haben. Probier es aus.'],
     notiz: 'Material: Teller, Papier, Schere, Stifte, Bleistift, Büroklammer.' });
-  const WOERTER_EXTRA = [['hat die größere Chance', 'Das passiert eher als das andere.'], ['hat die gleiche Chance', 'Beides passiert ungefähr gleich oft.']];
-  const stempelSvg = () => T().stempel('<circle class="stempel__welle" cx="50" cy="55" r="17"/><path class="stempel__welle" d="M50 38v34M33 55h34"/><path class="stempel__kugel" d="M44 28h12l-6 9z"/>');
+  const WOERTER_EXTRA = [['hat die größere Chance', 'Das passiert eher als das andere.'], ['hat die gleiche Chance', 'Keins ist im Vorteil.']];
+  const stempelSvg = () => T().stempel('<circle class="stempel__welle" cx="50" cy="55" r="17"/><path class="stempel__welle" d="M50 38v34M64.7 46.5L35.3 63.5M64.7 63.5L35.3 46.5"/><path class="stempel__kugel" d="M44 28h12l-6 9z"/>');
 
   /* ---------- Stufenwahl ---------- */
   function ansichtStufen() {
@@ -109,8 +109,7 @@
     const weiter = s.fertig ? `<p class="knopfreihe">${weiterKnopf}</p>` : '';
     let html = '';
     if (a.art === 'einordnen' || a.art === 'zahlenrad') {
-      html = `<p class="wuerfi-sagt">Würfi sagt:</p>
-        <p class="aussage" id="gr-frage">${esc(a.satz)}</p>
+      html = `<div class="wuerfi-aussage">${ctx.wuerfiKlein}<div><p class="nurvorlesen">Würfi sagt:</p><p class="aussage" id="gr-frage">${esc(a.satz)}</p></div></div>
         <h2 class="frage-klein">Wie wahrscheinlich ist das?</h2>
         <div class="skala" role="group" aria-label="Wahrscheinlichkeitsskala">
           ${a.antworten.map(w => `<button type="button" class="knopf skala-knopf skala-knopf--${w}${s.skalaRichtig && w === a.loesung ? ' ist-richtig' : ''}" data-gr="skala" data-wert="${w}"${s.phase !== 'start' ? ' disabled' : ''}>${esc(E().wort(w))}</button>`).join('')}
@@ -123,7 +122,7 @@
         ${s.phase === 'begr' && !s.begrVersuche ? '' : rueck}${erkl}${weiter}`;
     } else if (a.art === 'gestalten') {
       const n = s.felder.length, voll = n >= a.plaetze;
-      html = `<p class="wuerfi-sagt">Färbe das Rad. Es hat ${a.plaetze} Felder. Dann soll gelten:</p>
+      html = `<p class="auftrag">Färbe das Rad. Es hat ${a.plaetze} Felder. Dann soll gelten:</p>
         <p class="aussage" id="gr-frage">${esc(a.satz)}</p>
         <div class="farb-knoepfe" role="group" aria-label="Felder färben">
           ${C().farben.map(f => `<button type="button" class="knopf farb-knopf" data-gr="faerben" data-farbe="${f.id}" aria-label="Ein Feld ${esc(f.adj)} färben"${voll || s.fertig ? ' disabled' : ''}>${kugelSymbol(f.id)}<span>${esc(f.name)}</span></button>`).join('')}
@@ -136,17 +135,17 @@
         ${rueck}${erkl}${weiter}`;
     } else if (a.art === 'vermuten') {
       const offen = s.gezogen < a.zuege;
-      html = `<p class="wuerfi-sagt">Erst vermuten, dann drehen.</p>
+      html = `<p class="auftrag">Erst vermuten, dann drehen.</p>
         <p class="aussage" id="gr-frage">Wir drehen ${a.zuege}-mal. Auf welcher Farbe bleibt das Rad wohl am häufigsten stehen?</p>
         <div class="farb-knoepfe" role="group" aria-label="Deine Vermutung">
           ${a.antworten.map(id => `<button type="button" class="knopf farb-knopf" data-gr="vermuten" data-farbe="${id}" aria-pressed="${s.vermutung === id}"${s.phase !== 'start' ? ' disabled' : ''}>${kugelSymbol(id)}<span>${esc(F(id).name)}</span></button>`).join('')}
         </div>
         ${s.phase === 'start' ? `<p class="knopfreihe"><button type="button" class="knopf haupt" data-gr="vermutung-fest"${s.vermutung ? '' : ' disabled'}>Ich bin fertig mit Vermuten</button></p>` : `
         <div class="ziehen">
-          <p class="knopfreihe">
+          ${s.fertig ? `${rueck}${erkl}<p class="knopfreihe">${s.hundert ? '' : '<button type="button" class="knopf" data-gr="hundert">Jetzt 100-mal drehen</button>'}${weiterKnopf}</p>` : `<p class="knopfreihe">
             <button type="button" class="knopf haupt dreh-knopf" data-gr="drehen" data-n="1"${offen && !s.dreht ? '' : ' disabled'}>Drehen</button>
             ${a.zuege - s.gezogen === 1 ? '' : `<button type="button" class="knopf" data-gr="drehen" data-n="10"${offen && !s.dreht ? '' : ' disabled'}>${a.zuege - s.gezogen > 0 ? Math.min(10, a.zuege - s.gezogen) : 10}-mal drehen</button>`}
-          </p>
+          </p>`}
           <p class="leise">${s.gezogen} von ${a.zuege}-mal gedreht</p>
           <h3 class="frage-klein">Strichliste</h3>
           ${T().strichliste(ctx, a.antworten, s.zaehlung)}
@@ -156,8 +155,7 @@
           </div>
           ${s.hundert ? '<p>Vergleich die beiden Diagramme mit dem Rad.</p>' : ''}
         </div>`}
-        ${rueck}${erkl}
-        ${s.fertig ? `<p class="knopfreihe">${s.hundert ? '' : '<button type="button" class="knopf" data-gr="hundert">Jetzt 100-mal drehen</button>'}${weiterKnopf}</p>` : ''}`;
+        ${s.fertig ? '' : rueck + erkl}`;
     } else if (a.art === 'gleicheChance') {
       html = `<p class="aussage" id="gr-frage">${esc(a.satz)}</p>
         <div class="antworten antworten--reihe" role="group" aria-label="Räder wählen">

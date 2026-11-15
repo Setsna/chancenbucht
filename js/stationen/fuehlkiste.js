@@ -115,8 +115,7 @@
     const weiter = s.fertig ? `<p class="knopfreihe"><button type="button" class="knopf haupt" data-fk="weiter">${z.i + 1 < z.aufgaben.length ? 'Weiter' : 'Zum Rundenende'}</button></p>` : '';
 
     if (a.art === 'einordnen') {
-      html = `<p class="wuerfi-sagt">Würfi sagt:</p>
-        <p class="aussage" id="fk-frage">${esc(a.satz)}</p>
+      html = `<div class="wuerfi-aussage">${ctx.wuerfiKlein}<div><p class="nurvorlesen">Würfi sagt:</p><p class="aussage" id="fk-frage">${esc(a.satz)}</p></div></div>
         <h2 class="frage-klein">Wie wahrscheinlich ist das?</h2>
         <div class="skala" role="group" aria-label="Wahrscheinlichkeitsskala">
           ${a.antworten.map(w => `<button type="button" class="knopf skala-knopf skala-knopf--${w}${s.skalaRichtig && w === a.loesung ? ' ist-richtig' : ''}" data-fk="skala" data-wert="${w}"${s.phase !== 'start' ? ' disabled' : ''}>${esc(E().wort(w))}</button>`).join('')}
@@ -129,7 +128,7 @@
         ${s.phase === 'begr' && !s.begrVersuche ? '' : rueck}${erkl}${weiter}`;
     } else if (a.art === 'fuellen') {
       const voll = Object.values(s.kiste).reduce((x, n) => x + n, 0) >= a.plaetze;
-      html = `<p class="wuerfi-sagt">Fülle die Kiste. Es sind immer ${a.plaetze} Kugeln. Dann soll gelten:</p>
+      html = `<p class="auftrag">Fülle die Kiste. Es sind immer ${a.plaetze} Kugeln. Dann soll gelten:</p>
         <p class="aussage" id="fk-frage">${esc(a.satz)}</p>
         <div class="farb-knoepfe" role="group" aria-label="Kugeln hineinlegen">
           ${C().farben.map(f => `<button type="button" class="knopf farb-knopf" data-fk="legen" data-farbe="${f.id}" aria-label="Eine ${esc(f.akk)} Kugel hineinlegen"${voll || s.fertig ? ' disabled' : ''}>${kugelSymbol(f.id)}<span>${esc(f.name)}</span></button>`).join('')}
@@ -141,15 +140,14 @@
         <p class="leise" id="fk-fuellstand">${Object.values(s.kiste).reduce((x, n) => x + n, 0)} von ${a.plaetze} Kugeln in der Kiste</p>
         ${rueck}${erkl}${weiter}`;
     } else if (a.art === 'vermuten') {
-      html = `<p class="wuerfi-sagt">Erst vermuten, dann ziehen.</p>
+      html = `<p class="auftrag">Erst vermuten, dann ziehen.</p>
         <p class="aussage" id="fk-frage">Wir ziehen ${a.zuege}-mal. Jede Kugel kommt sofort zurück in die Kiste. Welche Farbe ziehen wir wohl am häufigsten?</p>
         <div class="farb-knoepfe" role="group" aria-label="Deine Vermutung">
           ${a.antworten.map(id => `<button type="button" class="knopf farb-knopf" data-fk="vermuten" data-farbe="${id}" aria-pressed="${s.vermutung === id}"${s.phase !== 'start' ? ' disabled' : ''}>${kugelSymbol(id)}<span>${esc(F(id).name)}</span></button>`).join('')}
         </div>
         ${s.phase === 'start' ? `<p class="knopfreihe"><button type="button" class="knopf haupt" data-fk="vermutung-fest"${s.vermutung ? '' : ' disabled'}>Ich bin fertig mit Vermuten</button></p>` : ''}
-        ${s.phase !== 'start' ? ziehBereich(a, s) : ''}
-        ${rueck}${erkl}
-        ${s.fertig ? `<p class="knopfreihe"><button type="button" class="knopf" data-fk="nochmal">Noch einmal ${a.zuege}</button><button type="button" class="knopf haupt" data-fk="weiter">${z.i + 1 < z.aufgaben.length ? 'Weiter' : 'Zum Rundenende'}</button></p>` : ''}`;
+        ${s.phase !== 'start' ? ziehBereich(a, s, `${rueck}${erkl}<p class="knopfreihe"><button type="button" class="knopf" data-fk="nochmal">Noch einmal ${a.zuege}</button><button type="button" class="knopf haupt" data-fk="weiter">${z.i + 1 < z.aufgaben.length ? 'Weiter' : 'Zum Rundenende'}</button></p>`) : ''}
+        ${s.fertig ? '' : rueck + erkl}`;
     } else if (a.art === 'vergleichen' || a.art === 'zweiKisten') {
       html = `<p class="aussage" id="fk-frage">${esc(a.satz)}</p>
         <div class="antworten" role="group" aria-label="Antworten">
@@ -173,15 +171,16 @@
   }
 
   /* Strichliste, Säulendiagramm (mit Tabelle) und Zieh-Knöpfe */
-  function ziehBereich(a, s) {
+  /* abschluss: nach dem letzten Zug stehen Rückmeldung und Knöpfe an der Stelle der Zieh-Knöpfe (6c) */
+  function ziehBereich(a, s, abschluss) {
     const offen = s.gezogen < a.zuege;
     const farben = a.art === 'verdeckt' ? a.farben : a.antworten;
     return `
       <div class="ziehen">
-        <p class="knopfreihe">
+        ${s.fertig && abschluss ? abschluss : `<p class="knopfreihe">
           <button type="button" class="knopf glas-knopf--hell" data-fk="ziehen" data-n="1"${offen && !s.fertig ? '' : ' disabled'}>1 ziehen</button>
           <button type="button" class="knopf glas-knopf--hell" data-fk="ziehen" data-n="10"${offen && !s.fertig && s.gezogen + 10 <= a.zuege ? '' : ' disabled'}>10 ziehen</button>
-        </p>
+        </p>`}
         <p class="leise">${s.gezogen} von ${a.zuege} Kugeln gezogen</p>
         <h3 class="frage-klein">Strichliste</h3>
         ${T().strichliste(ctx, farben, s.zaehlung)}

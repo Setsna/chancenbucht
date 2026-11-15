@@ -128,8 +128,7 @@
     const weiter = s.fertig ? `<p class="knopfreihe">${weiterKnopf}</p>` : '';
     let html = '';
     if (a.art === 'einordnen1') {
-      html = `<p class="wuerfi-sagt">Würfi sagt:</p>
-        <p class="aussage" id="wu-frage">${esc(a.satz)}</p>
+      html = `<div class="wuerfi-aussage">${ctx.wuerfiKlein}<div><p class="nurvorlesen">Würfi sagt:</p><p class="aussage" id="wu-frage">${esc(a.satz)}</p></div></div>
         <h2 class="frage-klein">Wie wahrscheinlich ist das?</h2>
         <div class="skala" role="group" aria-label="Wahrscheinlichkeitsskala">
           ${a.antworten.map(w => `<button type="button" class="knopf skala-knopf skala-knopf--${w}${s.skalaRichtig && w === a.loesung ? ' ist-richtig' : ''}" data-wu="skala" data-wert="${w}"${s.phase !== 'start' ? ' disabled' : ''}>${esc(E().wort(w))}</button>`).join('')}
@@ -139,17 +138,17 @@
     } else if (a.art === 'vermuten1' || a.art === 'vermutenSumme') {
       const eins = a.art === 'vermuten1';
       const rest = a.zuege - s.gezogen;
-      html = `<p class="wuerfi-sagt">Erst vermuten, dann würfeln.</p>
+      html = `<p class="auftrag">Erst vermuten, dann würfeln.</p>
         <p class="aussage" id="wu-frage">${eins ? `Wir würfeln ${a.zuege}-mal. Welche Zahl kommt wohl am häufigsten?` : `Wir würfeln ${a.zuege}-mal mit zwei Würfeln und zählen die Augen zusammen. Welche Summe kommt wohl am häufigsten?`}</p>
         <div class="${eins ? 'zahl-knoepfe' : 'zahl-knoepfe zahl-knoepfe--summen'}" role="group" aria-label="Deine Vermutung">
           ${a.antworten.map(x => `<button type="button" class="knopf zahl-knopf${x === 'gleich' ? ' zahl-knopf--breit' : ''}" data-wu="vermuten" data-wert="${x}" aria-pressed="${s.vermutung === x}"${s.phase !== 'start' ? ' disabled' : ''}>${x === 'gleich' ? 'Alle Zahlen haben die gleiche Chance.' : esc(x)}</button>`).join('')}
         </div>
         ${s.phase === 'start' ? `<p class="knopfreihe"><button type="button" class="knopf haupt" data-wu="vermutung-fest"${s.vermutung ? '' : ' disabled'}>Ich bin fertig mit Vermuten</button></p>` : `
         <div class="ziehen">
-          <p class="knopfreihe">
+          ${s.fertig ? `${rueck}${erkl}<p class="knopfreihe">${s.hundert ? '' : '<button type="button" class="knopf" data-wu="hundert">Jetzt 100-mal würfeln</button>'}${weiterKnopf}</p>` : `<p class="knopfreihe">
             <button type="button" class="knopf haupt dreh-knopf" data-wu="wuerfeln" data-n="1"${rest > 0 && !s.wuerfelt ? '' : ' disabled'}>Würfeln</button>
             ${rest === 1 ? '' : `<button type="button" class="knopf" data-wu="wuerfeln" data-n="10"${rest > 0 && !s.wuerfelt ? '' : ' disabled'}>${rest > 0 ? Math.min(10, rest) : 10}-mal würfeln</button>`}
-          </p>
+          </p>`}
           <p class="leise">${s.gezogen} von ${a.zuege}-mal gewürfelt</p>
           <h3 class="frage-klein">Strichliste</h3>
           ${strichliste(eins ? AUGEN : SUMMEN, s.zaehlung)}
@@ -159,8 +158,7 @@
           </div>
           ${s.hundert ? '<p>Vergleich die beiden Diagramme.</p>' : ''}
         </div>`}
-        ${rueck}${erkl}
-        ${s.fertig ? `<p class="knopfreihe">${s.hundert ? '' : '<button type="button" class="knopf" data-wu="hundert">Jetzt 100-mal würfeln</button>'}${weiterKnopf}</p>` : ''}`;
+        ${s.fertig ? '' : rueck + erkl}`;
     } else if (a.art === 'forschen') {
       html = `<p class="aussage" id="wu-frage">${esc(a.satz)}</p>
         <table class="wurf-gitter">

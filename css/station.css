@@ -45,7 +45,10 @@
 .kisten-reihe--klein { grid-template-columns: repeat(3, 1fr); }
 .kisten-reihe--klein .kiste { max-width: 9rem; }
 .aufgabe { margin: 0; max-width: none; }
-.wuerfi-sagt { margin: 0; color: var(--tinte-leise); font-size: var(--gr-klein); }
+.auftrag { margin: 0 0 0.2rem; color: var(--navy); font-size: var(--gr-text); }   /* Arbeitsauftrag in Lesegröße (6c) */
+.wuerfi-aussage { display: flex; align-items: center; gap: var(--a-s); }   /* Würfis Satz mit seinem Bild statt grauer Überzeile (6c) */
+.wuerfi-aussage .wuerfi-klein { flex: none; width: 3.25rem; height: 3.25rem; }
+.wuerfi-aussage > div { min-width: 0; }
 .aussage { font-size: var(--gr-text); font-weight: 700; margin: var(--a-xs) 0 var(--a-m); }
 .frage-klein { font-family: var(--schrift-text); font-weight: 700; font-size: var(--gr-label); margin: var(--a-m) 0 var(--a-s); }
 
@@ -70,7 +73,7 @@
 .skala-knopf--unwahrscheinlich, .ws-unwahrscheinlich th { --fuell: 25%; }
 .skala-knopf--unmoeglich::before, .ws-unmoeglich th::before { border-style: dashed; }
 .knopf.ist-richtig, .knopf.ist-richtig[disabled] { background: var(--navy); color: var(--weiss); opacity: 1; }
-.ist-richtig::after { content: ' ✓'; }
+.ist-richtig::after { content: ''; display: inline-block; width: 0.36em; height: 0.72em; margin-left: 0.55em; border-right: 0.18em solid currentColor; border-bottom: 0.18em solid currentColor; transform: translateY(-0.1em) rotate(45deg); }   /* gezeichneter Haken (6c) */
 .farb-knopf { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0 var(--a-s); }
 .farb-knopf[aria-pressed="true"] { background: var(--navy); color: var(--weiss); }
 .kugel-symbol { width: 1.75rem; height: 1.75rem; flex: none; }
@@ -183,7 +186,7 @@
 .wurf-gitter td { padding: 0; }
 .gitter-knopf { min-width: var(--tippen); min-height: var(--tippen); width: 100%; padding: 0 0.3rem; font-size: var(--gr-klein); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .gitter-knopf[aria-pressed="true"] { background: var(--navy); color: var(--weiss); }
-.gitter-knopf.ist-richtig::after { content: ''; }
+.gitter-knopf.ist-richtig::after { content: none; }
 .gitter-knopf.ist-richtig { outline: 3px solid var(--welle); outline-offset: 1px; }
 
 /* Tabelle der Würfe und Spielstand auf der Bühne */
@@ -349,3 +352,11 @@
 /* 6b: Skala zweispaltig nur, wenn „unwahrscheinlich“ in eine halbe Zeile passt (etwa 9,5 Schriftbreiten); sonst eine Spalte.
    Wächst mit der Schriftgröße mit, also auch bei 200 % Text. Silbentrennung per CSS kann Chrome unter Windows nicht. */
 .skala:not(.skala--drei) { grid-template-columns: repeat(auto-fit, minmax(min(100%, max(9.5em, calc((100% - var(--a-s)) / 2))), 1fr)); }   /* höchstens zwei Spalten */
+
+/* ---------- Etappe 6c (Finish-Review) ---------- */
+.zusammen { white-space: nowrap; }
+/* Tabelle auf der Bühne: runde Ecken ohne dunkle Zwickel */
+.buehne .wege-tabelle { border-collapse: separate; border-spacing: 0; overflow: hidden; }
+.buehne .wege-tabelle th, .buehne .wege-tabelle td { border-width: 0 0 1px 1px; }
+.buehne .wege-tabelle tr > :first-child { border-left-width: 0; }
+.buehne .wege-tabelle tbody tr:last-child > * { border-bottom-width: 0; }
