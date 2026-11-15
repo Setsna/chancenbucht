@@ -222,6 +222,27 @@ a.knopf { display: inline-flex; align-items: center; text-decoration: none; }
 .sym .m-streifen { fill: url(#m-streifen); stroke: none; }
 .sym .m-punkte { fill: url(#m-punkte); stroke: none; }
 .sym .m-karo { fill: url(#m-karo); stroke: none; }
+/* Materialien der Stationen (dieselben Farben wie Kiste, Rad, Würfel und Münze in den Stationen) */
+.sym .sym-holz { fill: #8a6140; stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.8; }
+.sym .sym-deckel { fill: #7a5536; stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.8; }
+.sym .sym-kante { stroke: #a77b52; stroke-width: 2.4; }
+.sym .sym-loch { fill: #24170e; stroke: #c9b79a; stroke-width: 1.6; }
+.sym .sym-rand { fill: none; stroke: #7a5536; stroke-width: 4; }
+.sym .sym-duenn { stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.4; }
+.sym .sym-nabe { fill: #e9e2cf; stroke: #5c3e26; stroke-width: 1.4; }
+.sym .sym-zeiger { fill: var(--navy); stroke: rgba(255, 255, 255, 0.92); stroke-width: 1.6; }
+.sym .sym-elfenbein { fill: #f3ecdc; stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.6; }
+.sym .sym-auge { fill: var(--navy); stroke: none; }
+.sym .sym-bronze { fill: #b8925a; stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.6; }
+.sym .sym-riffel { fill: none; stroke: #8a6a3b; stroke-width: 2.2; stroke-dasharray: 1.6 2.4; }
+.sym .sym-gold { fill: #e0c48f; stroke: #9a7744; stroke-width: 1.2; }
+.sym .sym-gold--hinten { fill: #c9a874; }
+.sym .sym-praegung { stroke: #5a4223; stroke-width: 3.4; }
+.sym .sym-praegung--fein { stroke-width: 2; }
+.sym .sym-glas { fill: rgba(200, 236, 255, 0.22); stroke: none; }
+.sym .sym-glasrand { fill: none; stroke: var(--kugel-gelb); stroke-width: 3.4; }
+.sym .sym-griff { stroke: #7a5536; stroke-width: 7; }
+.sym .sym-frage { stroke: rgba(255, 255, 255, 0.95); stroke-width: 2.6; }
 .muster-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .muster-linie { stroke: var(--muster-hell); stroke-width: 1.6; fill: none; }
 .muster-punkt { fill: var(--muster-hell); }
