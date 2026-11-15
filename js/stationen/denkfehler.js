@@ -98,6 +98,9 @@
     }
     b.insertAdjacentHTML('beforeend', vorherHtml(a));
     if (s.versuch && s.versuch.feld) { b.appendChild(legende('Blau', 'der Zug danach')); b.appendChild(zugFeld(s.versuch)); }
+    /* Ergebnis des Ausprobierens auf der Bühne, damit rechts „Warum?“ ohne Scrollen sichtbar bleibt (Ingo, 15.11.2026) */
+    b.classList.toggle('buehne--versuch', !!s.versuch);
+    if (s.versuch) b.insertAdjacentHTML('beforeend', '<div class="versuch-karte" id="df-versuch"></div>');
   }
   /* 100 Züge als kleine Reihe aus Buchstaben (B/R), dreimal Blau umrandet, der Zug danach hervorgehoben */
   /* B15: Legende über dem Feld, damit Rahmen und dunkles Kästchen ohne Erklärung lesbar sind */
@@ -167,7 +170,7 @@
     const saeulen = (kat, werte, schatten, titel) => { const d = CB.saeulen.zeichnen({ kategorien: kat, werte, schatten, titel }); const w = document.createElement('div'); w.className = 'diagramm'; w.appendChild(d.svg); w.appendChild(d.tabelle); return w; };
     ort.textContent = '';
     if (t === 'kisteAuszaehlen' || t === 'kiste' || t === 'rad') {
-      ort.insertAdjacentHTML('beforeend', T().strichliste(ctx, v.farben, v.zaehlung));
+      /* keine Strichliste: Würfi hat schon gezählt, bei 100 Zügen wären es über 100 Striche (Ingo, 15.11.2026) */
       const d = document.createElement('div'); d.className = 'diagramm'; ort.appendChild(d);
       T().diagramm(d, v.farben, v.zaehlung, null, t === 'rad' ? 'Gedrehte Farben' : 'Gezogene Kugeln');
     } else if (t === 'zweiKisten') {
@@ -176,6 +179,10 @@
       ort.appendChild(w);
     } else if (t === 'wuerfel') ort.appendChild(saeulen(neutral(AUGEN), v.zaehlung, a.zustand.schatten, 'Gewürfelte Zahlen'));
     else { const d = saeulen(neutral(SUMMEN), v.zaehlung, null, 'Gewürfelte Summen'); d.classList.add('diagramm--breit'); ort.appendChild(d); }
+    /* „Noch einmal“ gehört zum Ausprobieren und steht deshalb mit auf der Karte */
+    const s = a.zustand;
+    if (a.versuch.schatten && !s.schatten && s.phase !== 'start') ort.insertAdjacentHTML('beforeend', '<p class="knopfreihe"><button type="button" class="knopf" data-df="noch">Noch einmal ' + a.versuch.n + '</button></p>');
+    if (s.schatten) ort.insertAdjacentHTML('beforeend', '<p>Vergleich die beiden Male. Sind sie gleich?</p>');
   }
 
   /* ---------- Aufgabe ---------- */
@@ -194,7 +201,7 @@
       </div>
       ${rueck}
       ${versuchFrei && !s.versuch ? `<p class="knopfreihe"><button type="button" class="knopf haupt" data-df="versuch">Probieren wir es aus</button></p>` : ''}
-      ${s.versuch ? `<p class="versuch-text">${esc(versuchText(a, s.versuch))}</p><div id="df-versuch"></div>${a.versuch.schatten && !s.schatten && s.phase !== 'start' ? '<p class="knopfreihe"><button type="button" class="knopf" data-df="noch">Noch einmal ' + a.versuch.n + '</button></p>' : ''}${s.schatten ? '<p>Vergleich die beiden Male. Sind sie gleich?</p>' : ''}` : ''}
+      ${s.versuch ? `<p class="versuch-text">${esc(versuchText(a, s.versuch))}</p>` : ''}
       ${s.phase === 'begr' || s.phase === 'ende' ? `
         <h2 class="frage-klein">Warum? Tippe den passenden Satz an.</h2>
         <div class="begruendungen" role="group" aria-label="Begründungen">
