@@ -32,7 +32,8 @@
     cloud: {
       kinder: 'kinder',        /* kinder/<code>: Vorname, von der Lehrkraft angelegt (nur lesen) */
       stand: 'cb_stand',       /* cb_stand/<code>: der Stand dieses Kindes in der Chancenbucht */
-      schreibPauseMs: 2500     /* so lange nach der letzten Änderung warten, dann gebündelt schreiben */
+      schreibPauseMs: 2500,    /* so lange nach der letzten Änderung warten, dann gebündelt schreiben */
+      freigabe: 'chancenbucht' /* Schlüssel im Lehrerbereich des Perlentauchers (oeffentlich/plattformen), seit 21.11.2026 */
     },
 
     /* Stationen und Stufen. Die Ids sind Teil der Firebase-Regeln (feste Schlüssel 'station:stufe').
